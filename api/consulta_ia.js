@@ -1,11 +1,7 @@
-import OpenAI from "openai";
 import fetch from "node-fetch";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 const RSS_URL = "https://www.oticareformada.com/feeds/posts/default?alt=json&max-results=500";
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 export default async function handler(req, res) {
   // --- CORS ---
@@ -40,16 +36,25 @@ ${contexto}
 Se não souber, diga que não há informação suficiente nas postagens.
 `;
 
-    const resposta = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: mensagemSistema },
-        { role: "user", content: pergunta }
-      ],
-      temperature: 0.3
+    // --- Enviar para o modelo da Groq ---
+    const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-70b-versatile",
+        messages: [
+          { role: "system", content: mensagemSistema },
+          { role: "user", content: pergunta }
+        ],
+        temperature: 0.3
+      })
     });
 
-    const texto = resposta.choices[0].message.content;
+    const json = await resposta.json();
+    const texto = json.choices?.[0]?.message?.content || "Sem resposta da IA.";
     res.status(200).json({ resposta: texto });
 
   } catch (error) {
