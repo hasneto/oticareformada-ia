@@ -44,7 +44,7 @@ Se não souber, diga que não há informação suficiente nas postagens.
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.1-70b-versatile",
+        model: "llama-3.2-70b-versatile",
         messages: [
           { role: "system", content: mensagemSistema },
           { role: "user", content: pergunta }
