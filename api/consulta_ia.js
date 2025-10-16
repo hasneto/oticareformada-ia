@@ -36,7 +36,7 @@ ${contexto}
 Se não souber, diga que não há informação suficiente nas postagens.
 `;
 
-    // --- Enviar para o modelo da Groq ---
+    // --- Enviar para o modelo ativo da Groq ---
     const resposta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -44,7 +44,7 @@ Se não souber, diga que não há informação suficiente nas postagens.
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.2-70b-versatile",
+        model: "mixtral-8x7b",
         messages: [
           { role: "system", content: mensagemSistema },
           { role: "user", content: pergunta }
@@ -55,14 +55,13 @@ Se não souber, diga que não há informação suficiente nas postagens.
 
     const json = await resposta.json();
 
-if (!json.choices) {
-  console.error("Resposta da Groq:", json);
-  return res.status(500).json({ error: "Erro da Groq", detalhes: json });
-}
+    if (!json.choices || json.choices.length === 0) {
+      console.error("Resposta da Groq:", json);
+      return res.status(500).json({ error: "Erro da Groq", detalhes: json });
+    }
 
-const texto = json.choices[0].message.content;
-res.status(200).json({ resposta: texto });
-
+    const texto = json.choices[0].message.content;
+    res.status(200).json({ resposta: texto });
 
   } catch (error) {
     console.error(error);
