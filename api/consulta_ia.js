@@ -54,8 +54,15 @@ Se não souber, diga que não há informação suficiente nas postagens.
     });
 
     const json = await resposta.json();
-    const texto = json.choices?.[0]?.message?.content || "Sem resposta da IA.";
-    res.status(200).json({ resposta: texto });
+
+if (!json.choices) {
+  console.error("Resposta da Groq:", json);
+  return res.status(500).json({ error: "Erro da Groq", detalhes: json });
+}
+
+const texto = json.choices[0].message.content;
+res.status(200).json({ resposta: texto });
+
 
   } catch (error) {
     console.error(error);
